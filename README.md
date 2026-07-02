@@ -10,6 +10,15 @@ It's easy to spend all your time on sensor accuracy and algorithm response time 
 
 Generated 1,000 fake patients with numpy. Closed-loop mode gets a flat +3 hour bump in wear time, and anything under a 2.5 stability score counts as high dropout risk. These numbers came from skimming a few pain management papers, not a real fit — once I have actual data this needs recalibrating.
 
+## Analysis
+
+The first version just compared group averages, which turned out not to be enough — it couldn't tell whether the closed-loop effect was real or just confounded by baseline pain and stability differences between groups. So I added two things:
+
+- Kaplan-Meier curves to see how retention changes over time between the two modes, then a Cox proportional hazards model to check whether closed-loop mode still matters once you control for baseline pain and device stability
+- Sensitivity analysis, since the $2,000/patient and +3 hour numbers behind the TVaR estimate were both guesses — this tests how much the conclusion shifts if those assumptions change
+
+The data is still synthetic, but at least the analysis itself holds up.
+
 ## What it shows
 
 Patients with high baseline pain (around a 9) stick with closed-loop mode noticeably more than manual. Makes sense — if you're in that much pain, you don't want to be fiddling with settings yourself.
