@@ -12,12 +12,13 @@ Generated 1,000 fake patients with numpy. Closed-loop mode gets a flat +3 hour b
 
 ## Analysis
 
-The first version just compared group averages, which turned out not to be enough — it couldn't tell whether the closed-loop effect was real or just confounded by baseline pain and stability differences between groups. So I added two things:
+This version replaces the earlier synthetic-data approach with a real clinical dataset — 686 breast cancer patients from the German Breast Cancer Study Group (GBSG2), via the `lifelines` package.
 
-- Kaplan-Meier curves to see how retention changes over time between the two modes, then a Cox proportional hazards model to check whether closed-loop mode still matters once you control for baseline pain and device stability
-- Sensitivity analysis, since the $2,000/patient and +3 hour numbers behind the TVaR estimate were both guesses — this tests how much the conclusion shifts if those assumptions change
+Kaplan-Meier curves showed a clear split in recurrence-free survival between patients who received hormonal therapy and those who didn't (log-rank p = 0.0034). But before trusting a Cox model's conclusions, I checked the proportional hazards assumption — turned out both `age` and `tumor grade` violated it, meaning their effect on risk wasn't constant over time. Stratifying on both fixed that, and it wasn't just a formality: concordance index went from 0.673 to 0.714 after the fix.
 
-The data is still synthetic, but at least the analysis itself holds up.
+In the corrected model, hormonal therapy held up as a strong, independent predictor (HR = 0.69, p < 0.005) — about a 31% lower recurrence risk after controlling for nodal involvement, tumor size, age, and grade.
+
+Also compared the corrected Cox model against a Random Survival Forest. Cox came out ahead on concordance index (0.714 vs 0.650), and interestingly, RSF's permutation importance ranked hormonal therapy as contributing almost nothing to prediction — which contradicts what the Cox model found. Worth noting as a case where two valid models disagree on how much a variable matters.
 
 ## What it shows
 
